@@ -1,15 +1,6 @@
-package br.com.grawards.modelo;
+package br.com.grawards.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
-public class Indicado {
-
-	@Id @GeneratedValue (strategy = GenerationType.IDENTITY)
-	private Long id;
+public class IndicatedCsv {
 	
 	private Integer year;
 	private String title;
@@ -46,6 +37,14 @@ public class Indicado {
 	}
 	public void setWinner(String winner) {
 		this.winner = winner;
+	}
+	@Override
+	public String toString() {
+		return "Title: ".concat(this.title)
+				.concat(", Year:").concat(this.year.toString())
+				.concat(", Studios: ").concat(this.studios)
+				.concat(", Producers: ").concat(this.producers)
+				.concat(", Winner: ").concat(this.winner);		
 	}
 	
 }

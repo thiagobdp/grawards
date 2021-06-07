@@ -1,6 +1,6 @@
 package br.com.grawards.controller.form;
 
-public class IndicadoForm {
+public class IndicatedForm {
 
 	private Integer year;
 

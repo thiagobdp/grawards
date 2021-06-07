@@ -3,9 +3,9 @@ package br.com.grawards.controller.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.grawards.modelo.Indicado;
+import br.com.grawards.model.Indicated;
 
-public class IndicadoDto {
+public class IndicatedDto {
 
 	private Integer year;
 	private String title;
@@ -13,13 +13,13 @@ public class IndicadoDto {
 	private String producers;
 	private String winner;
 	
-	public IndicadoDto(Indicado indicado) {
+	public IndicatedDto(Indicated indicated) {
 		super();
-		this.year = indicado.getYear();
-		this.title = indicado.getTitle();
-		this.studios = indicado.getStudios();
-		this.producers = indicado.getProducers();
-		this.winner = indicado.getWinner();
+		this.year = indicated.getYear();
+		this.title = indicated.getTitle();
+		this.studios = indicated.getStudios();
+		this.producers = indicated.getProducers();
+		this.winner = indicated.getWinner();
 	}
 
 	public Integer getYear() {
@@ -42,7 +42,7 @@ public class IndicadoDto {
 		return winner;
 	}
 
-	public static List<IndicadoDto> converter(List<Indicado> indicados) {
-		 return indicados.stream().map(IndicadoDto::new).collect(Collectors.toList());
+	public static List<IndicatedDto> converter(List<Indicated> indicateds) {
+		 return indicateds.stream().map(IndicatedDto::new).collect(Collectors.toList());
 	}
 }

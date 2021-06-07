@@ -1,4 +1,4 @@
-package br.com.grawards.config.validacao;
+package br.com.grawards.config.validation;
 
 public class ErroDeFormularioDto {
 
