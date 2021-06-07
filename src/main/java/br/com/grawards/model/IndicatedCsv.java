@@ -1,11 +1,17 @@
 package br.com.grawards.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class IndicatedCsv {
 	
 	private Integer year;
 	private String title;
 	private String studios;
-	private String producers;		
+	private List<String> listStudios;
+	private String producers;
+	private List<String> listProducers;
 	private String winner;
 	
 	public Integer getYear() {
@@ -25,12 +31,14 @@ public class IndicatedCsv {
 	}
 	public void setStudios(String studios) {
 		this.studios = studios;
+		this.listStudios = this.splitStrings(studios);
 	}
 	public String getProducers() {
 		return producers;
 	}
 	public void setProducers(String producers) {
 		this.producers = producers;
+		this.listProducers = this.splitStrings(producers);
 	}
 	public String getWinner() {
 		return winner;
@@ -38,13 +46,36 @@ public class IndicatedCsv {
 	public void setWinner(String winner) {
 		this.winner = winner;
 	}
+	
+	public List<String> getListStudios() {
+		return listStudios;
+	}
+	public List<String> getListProducers() {
+		return listProducers;
+	}
+	
 	@Override
 	public String toString() {
 		return "Title: ".concat(this.title)
-				.concat(", Year:").concat(this.year.toString())
-				.concat(", Studios: ").concat(this.studios)
-				.concat(", Producers: ").concat(this.producers)
+				.concat(", Studios: ").concat(this.listStudios.toString())
+				.concat(", Producers: ").concat(this.listProducers.toString())
+				.concat(", Year:").concat(this.year.toString())				
 				.concat(", Winner: ").concat(this.winner);		
 	}
+	
+	
+	/*
+	 * Return the original string as a list splitted by  ", " and " and "
+	 */
+	private List<String> splitStrings(String original) {
+		List<String> splitComma = Arrays.asList(original.split(", "));		
+		List<String> splitAnd = new ArrayList<String>();		
+		splitComma.forEach(s -> splitAnd.addAll(Arrays.asList(s.split(" and "))));		
+		return splitComma;
+	}
+	
+	
+	
+	
 	
 }

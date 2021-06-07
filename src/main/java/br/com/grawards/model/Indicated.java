@@ -1,9 +1,13 @@
 package br.com.grawards.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class Indicated {
@@ -13,10 +17,16 @@ public class Indicated {
 	
 	private Integer year;
 	private String title;
-	private String studios;
-	private String producers;		
 	private String winner;
 	
+	@ManyToMany
+	@JoinTable(name = "indicated_studios")
+	private List<Studio> studios;
+	
+	@ManyToMany
+	@JoinTable(name = "indicated_producer")
+	private List<Producer> producers;
+		
 	public Integer getYear() {
 		return year;
 	}
@@ -29,23 +39,29 @@ public class Indicated {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getStudios() {
-		return studios;
-	}
-	public void setStudios(String studios) {
-		this.studios = studios;
-	}
-	public String getProducers() {
-		return producers;
-	}
-	public void setProducers(String producers) {
-		this.producers = producers;
-	}
 	public String getWinner() {
 		return winner;
 	}
 	public void setWinner(String winner) {
 		this.winner = winner;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public List<Studio> getStudios() {
+		return studios;
+	}
+	public void setStudios(List<Studio> studios) {
+		this.studios = studios;
+	}
+	public List<Producer> getProducers() {
+		return producers;
+	}
+	public void setProducers(List<Producer> producers) {
+		this.producers = producers;
 	}
 	
 }
