@@ -1,6 +1,7 @@
 package br.com.grawards.model;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,10 @@ public class Producer {
 	@ManyToMany (mappedBy = "producers")
 	private List<Indicated> indicateds; 
 
+	public Producer() {
+		super();
+	}
+
 	public Producer(String name) {
 		super();
 		this.name = name;
@@ -31,6 +36,16 @@ public class Producer {
 
 	public String getName() {
 		return name;
+	}
+
+	public List<Indicated> getIndicateds() {
+		return indicateds;
+	}
+
+	@Override
+	public String toString() {
+		
+		return this.name+this.getIndicateds().stream().map(i -> i.toString()).collect(Collectors.toList())+"\n";
 	}
 	
 }
