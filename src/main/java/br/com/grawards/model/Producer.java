@@ -20,6 +20,11 @@ public class Producer {
 	@ManyToMany (mappedBy = "producers")
 	private List<Indicated> indicateds; 
 
+	public Producer(String name) {
+		super();
+		this.name = name;
+	}
+
 	public Long getId() {
 		return id;
 	}

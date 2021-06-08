@@ -20,6 +20,13 @@ public class Studio {
 	@ManyToMany (mappedBy = "studios")
 	private List<Indicated> indicateds; 
 
+	
+	
+	public Studio(String name) {
+		super();
+		this.name = name;
+	}
+
 	public Long getId() {
 		return id;
 	}

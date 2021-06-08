@@ -65,13 +65,21 @@ public class IndicatedCsv {
 	
 	
 	/*
-	 * Return the original string as a list splitted by  ", " and " and "
+	 * Return the original string as a list splitted by: 
+	 * ", " 
+	 * " and "
+	 * at the end, stripes the values
 	 */
 	private List<String> splitStrings(String original) {
-		List<String> splitComma = Arrays.asList(original.split(", "));		
+		List<String> splitComma = Arrays.asList(original.split(", "));
+		
 		List<String> splitAnd = new ArrayList<String>();		
-		splitComma.forEach(s -> splitAnd.addAll(Arrays.asList(s.split(" and "))));		
-		return splitComma;
+		splitComma.forEach(s -> splitAnd.addAll(Arrays.asList(s.split(" and "))));
+		
+		List<String> stripedString = new ArrayList<String>();
+		splitAnd.forEach(s -> stripedString.add(s.strip()));
+		
+		return stripedString;
 	}
 	
 	
