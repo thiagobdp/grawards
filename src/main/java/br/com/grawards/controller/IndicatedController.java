@@ -29,6 +29,7 @@ import br.com.grawards.model.Indicated;
 import br.com.grawards.model.IndicatedCsv;
 import br.com.grawards.model.Producer;
 import br.com.grawards.model.Studio;
+import br.com.grawards.model.WinnerEnum;
 import br.com.grawards.repository.IndicatedRepository;
 import br.com.grawards.repository.ProducerRepository;
 import br.com.grawards.repository.StudioRepository;
@@ -46,57 +47,54 @@ public class IndicatedController {
 	@Autowired
 	private ProducerRepository producerRepository;
 
+	/**
+	 * Get the producer with the longest interval between two consecutive awards,
+	 * and the ones who got two awards faster
+	 * 
+	 * @return
+	 */
 	@GetMapping
+	@RequestMapping("/fastestSlowestWinnerProducer")
 	public FastestSlowestWinnerProducerDto fastestSlowestWinnerProducer() {
 
 		// find producers who won at least once
 //		List<Producer> prod = producerRepository.findByindicateds_winner("yes"); //TODO: assim traz duplicados, verificar qual o problema
 		List<Producer> prod = producerRepository.findAll();
 
-		System.out.println("JOEL: "
-				+ prod.stream().filter(p -> p.getName().equalsIgnoreCase("Joel Silver")).collect(Collectors.toList()));
-
+		// remove non-winning Indicateds
 		prod.stream().forEach(p -> p.setIndicateds(p.getIndicateds().stream()
-				.filter(i -> i.getWinner().equalsIgnoreCase("yes")).collect(Collectors.toList())));// remove indicateds
-																									// not winners
+				.filter(i -> i.getWinner().equalsIgnoreCase(WinnerEnum.YES.getWinner())).collect(Collectors.toList())));
 
-//		System.out.println("JOEL WINNER: "
-//				+ prod.stream().filter(p -> p.getName().equalsIgnoreCase("Joel Silver")).collect(Collectors.toList()));
-
-//		System.out.println("size prod: " + prod.size());
 		List<Producer> prodWinners = new ArrayList<Producer>();
 
-		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> prodWinners.add(p)); // keep only winners
-																									// with more then 1
-																									// win
-
-//		System.out.println("JOEL WINNER+d1: " + prodWinners.stream()
-//				.filter(p -> p.getName().equalsIgnoreCase("Joel Silver")).collect(Collectors.toList()));
-//
-//		System.out.println("size prodWinners: " + prodWinners.size());
+		// keep only the winners who have won at least twice
+		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> prodWinners.add(p));
 
 		HashMap<Integer, List<ProducerIntervalDto>> intervalMap = new HashMap<Integer, List<ProducerIntervalDto>>();
 
-		prodWinners.forEach(
-				p -> p.getIndicateds().stream().iterator().forEachRemaining(i1 -> this.difference(p, i1, intervalMap)));
-
-//		System.out.println("MIN: " + intervalMap.keySet().stream().mapToInt(t -> t).min());
-//		System.out.println("MAX: " + intervalMap.keySet().stream().mapToInt(t -> t).max());
-//		System.out.println(intervalMap);
+		prodWinners.forEach(p -> p.getIndicateds().stream().iterator()
+				.forEachRemaining(i1 -> this.calculateInterval(p, i1, intervalMap)));
 
 		return new FastestSlowestWinnerProducerDto(
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).min().getAsInt()),
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).max().getAsInt()));
-
 	}
 
-	public void difference(Producer p, Indicated i1, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
-
-		Integer diference;
+	/**
+	 * Calculates the interval of years between indicated1 and the next indicated in
+	 * the list of the Producer if there is another one
+	 * 
+	 * @param p           Producer
+	 * @param i1          Indicated
+	 * @param intervalMap HashMap of "Interval between winnings" and
+	 *                    "ProducerIntervalDto" that fits this interval
+	 */
+	public void calculateInterval(Producer p, Indicated i1, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
 
 		if (p.getIndicateds().indexOf(i1) < p.getIndicateds().size() - 1) {
 			Indicated i2 = p.getIndicateds().get(p.getIndicateds().indexOf(i1) + 1);
 
+			Integer diference;
 			if (i1.getYear() > i2.getYear()) {
 				diference = i1.getYear() - i2.getYear();
 			} else {
@@ -113,6 +111,11 @@ public class IndicatedController {
 		}
 	}
 
+	/**
+	 * Loads the CSV file, read data, splits in Entities and stores in the Data Base
+	 * 
+	 * @throws IOException
+	 */
 	@PostConstruct
 	public void loadFile() throws IOException {
 		File file;
@@ -124,7 +127,7 @@ public class IndicatedController {
 			HashMap<String, Studio> studioHmp = this.saveUniqueStudios(indicatedsCsvList);
 			HashMap<String, Producer> producerHmp = this.saveUniqueProducers(indicatedsCsvList);
 
-			List<Indicated> indicatedsList = this.indicatedRepository.saveAll(indicatedsCsvList.stream()
+			this.indicatedRepository.saveAll(indicatedsCsvList.stream()
 					.map(i -> new Indicated(i, studioHmp, producerHmp)).collect(Collectors.toList()));
 
 			System.out.println("END");
@@ -134,8 +137,11 @@ public class IndicatedController {
 		}
 	}
 
-	/*
-	 * Creates a Set of unduplicated Studios names and save in DB
+	/**
+	 * Create a set of non-duplicate Studio's names and save to database
+	 * 
+	 * @param indicatedsCsvList
+	 * @return HashMap of Studios having the name of the Studio as Key
 	 */
 	private HashMap<String, Studio> saveUniqueStudios(List<IndicatedCsv> indicatedsCsvList) {
 		// save unique studios
@@ -150,8 +156,11 @@ public class IndicatedController {
 		return studioHmp;
 	}
 
-	/*
-	 * Creates a Set of unduplicated Producers names and save in DB
+	/**
+	 * Create a set of non-duplicate Producer's names and save to database
+	 * 
+	 * @param indicatedsCsvList
+	 * @return HashMap of Producers having the name of the Producer as Key
 	 */
 	private HashMap<String, Producer> saveUniqueProducers(List<IndicatedCsv> indicatedsCsvList) {
 		// load and save unique producers
