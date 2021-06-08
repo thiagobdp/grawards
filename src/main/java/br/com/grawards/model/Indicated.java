@@ -98,7 +98,7 @@ public class Indicated {
 
 	@Override
 	public String toString() {
-		return "Winner: "+this.winner+", Title: "+this.title+", year: "+this.year;
+		return "Winner: " + this.winner + ", Title: " + this.title + ", year: " + this.year;
 	}
 
 }

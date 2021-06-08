@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -70,6 +71,8 @@ public class IndicatedController {
 		// keep only the winners who have won at least twice
 		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> prodWinners.add(p));
 
+		prodWinners.stream().forEach(p -> p.getIndicateds().sort(Comparator.comparing(Indicated::getYear)));
+
 		HashMap<Integer, List<ProducerIntervalDto>> intervalMap = new HashMap<Integer, List<ProducerIntervalDto>>();
 
 		prodWinners.forEach(p -> p.getIndicateds().stream().iterator()
@@ -84,7 +87,7 @@ public class IndicatedController {
 	 * Calculates the interval of years between indicated1 and the next indicated in
 	 * the list of the Producer if there is another one
 	 * 
-	 * @param p           Producer
+	 * @param p           Producer The List of Indicateds must be already ordered by year
 	 * @param i1          Indicated
 	 * @param intervalMap HashMap of "Interval between winnings" and
 	 *                    "ProducerIntervalDto" that fits this interval
@@ -94,12 +97,7 @@ public class IndicatedController {
 		if (p.getIndicateds().indexOf(i1) < p.getIndicateds().size() - 1) {
 			Indicated i2 = p.getIndicateds().get(p.getIndicateds().indexOf(i1) + 1);
 
-			Integer diference;
-			if (i1.getYear() > i2.getYear()) {
-				diference = i1.getYear() - i2.getYear();
-			} else {
-				diference = i2.getYear() - i1.getYear();
-			}
+			Integer diference = i2.getYear() - i1.getYear();
 
 			if (intervalMap.containsKey(diference)) {
 				intervalMap.get(diference)
