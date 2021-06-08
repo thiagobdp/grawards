@@ -11,14 +11,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.HashMapChangeSet;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.grawards.Utils.CsvUtil;
 import br.com.grawards.controller.dto.FastestSlowestWinnerProducerDto;
-import br.com.grawards.controller.dto.IndicatedDto;
 import br.com.grawards.controller.dto.ProducerIntervalDto;
 import br.com.grawards.model.Indicated;
 import br.com.grawards.model.IndicatedCsv;
@@ -50,72 +47,72 @@ public class IndicatedController {
 	private ProducerRepository producerRepository;
 
 	@GetMapping
-	public String fastestSlowestWinnerProducer() {
+	public FastestSlowestWinnerProducerDto fastestSlowestWinnerProducer() {
 
 		// find producers who won at least once
-		List<Producer> prod = producerRepository.findByindicateds_winner("yes");
+//		List<Producer> prod = producerRepository.findByindicateds_winner("yes"); //TODO: assim traz duplicados, verificar qual o problema
+		List<Producer> prod = producerRepository.findAll();
 
-		prod.stream().forEach(p -> p.getIndicateds().stream().filter(i -> i.getWinner().equalsIgnoreCase(""))
-				.map(i -> p.getIndicateds().remove(i)));// remove indicateds not winners
-		
-		System.out.println("size: " + prod.size());
+		System.out.println("JOEL: "
+				+ prod.stream().filter(p -> p.getName().equalsIgnoreCase("Joel Silver")).collect(Collectors.toList()));
+
+		prod.stream().forEach(p -> p.setIndicateds(p.getIndicateds().stream()
+				.filter(i -> i.getWinner().equalsIgnoreCase("yes")).collect(Collectors.toList())));// remove indicateds
+																									// not winners
+
+//		System.out.println("JOEL WINNER: "
+//				+ prod.stream().filter(p -> p.getName().equalsIgnoreCase("Joel Silver")).collect(Collectors.toList()));
+
+//		System.out.println("size prod: " + prod.size());
 		List<Producer> prodWinners = new ArrayList<Producer>();
 
-		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> prodWinners.add(p));
+		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> prodWinners.add(p)); // keep only winners
+																									// with more then 1
+																									// win
 
-		System.out.println("size: " + prodWinners.size());
-//		.filter(Producer p -> p.getIndicateds().size()>1);
-//				.filter(p -> p.getIndicateds().size() > 1)
-//				.collect(Collectors.toList());
-
-//		System.out.println(Arrays.asList(prod));
+//		System.out.println("JOEL WINNER+d1: " + prodWinners.stream()
+//				.filter(p -> p.getName().equalsIgnoreCase("Joel Silver")).collect(Collectors.toList()));
+//
+//		System.out.println("size prodWinners: " + prodWinners.size());
 
 		HashMap<Integer, List<ProducerIntervalDto>> intervalMap = new HashMap<Integer, List<ProducerIntervalDto>>();
-		
-		prodWinners.forEach(p -> p.getIndicateds().stream().flatMap(i1 -> p
-				.getIndicateds().stream().filter(i2 -> i1.getYear() != i2.getYear()) // avoid same year subtraction
-				.filter(i2 -> i1.getWinner().equalsIgnoreCase("yes") && i2.getWinner().equalsIgnoreCase("yes"))// consider only winners
-//				.map(i2 -> i1.getYear() - i2.getYear() > 0 ? i1.getYear() - i2.getYear() : i2.getYear() - i1.getYear()))
-				.map(i2 -> this.difference(p, i1, i2, intervalMap)))				
-				.mapToInt(t -> t).min());
 
-		System.out.println(intervalMap);
-//		prod.forEach(
-//				p -> System.out.println(p.getIndicateds().stream()
-//				.flatMap(i1 -> p.getIndicateds().stream()
-//						.map(i2 -> i1.getYear()-i2.getYear() > 0? i1.getYear()-i2.getYear(): i2.getYear()-i1.getYear()))
-//						.mapToInt(t -> t).min().getAsInt()));
+		prodWinners.forEach(
+				p -> p.getIndicateds().stream().iterator().forEachRemaining(i1 -> this.difference(p, i1, intervalMap)));
 
-		return "ok";
+//		System.out.println("MIN: " + intervalMap.keySet().stream().mapToInt(t -> t).min());
+//		System.out.println("MAX: " + intervalMap.keySet().stream().mapToInt(t -> t).max());
+//		System.out.println(intervalMap);
 
-//		OptionalInt min = list1.stream()
-//                .flatMap(n -> list2.stream()
-//                .map(r -> n-r > 0? n-r: r-n))
-//                .mapToInt(t -> t).min();
-
-//		return FastestSlowestWinnerProducerDto.converter(indicateds);
+		return new FastestSlowestWinnerProducerDto(
+				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).min().getAsInt()),
+				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).max().getAsInt()));
 
 	}
 
-	public Integer difference(Producer p, Indicated i1, Indicated i2, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
-		//i2 -> i1.getYear() - i2.getYear() > 0 ? i1.getYear() - i2.getYear() : i2.getYear() - i1.getYear())
+	public void difference(Producer p, Indicated i1, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
+
 		Integer diference;
-		
-		if (i1.getYear()>i2.getYear()) {
-			diference=i1.getYear()-i2.getYear();			
-		} else {
-			diference=i2.getYear()-i1.getYear();
-		}
-		
-		if (intervalMap.containsKey(diference)) {				
-			intervalMap.get(diference).add(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()));
-//			intervalMap.get(diference).add(ProducerIntervalDto::new);
-		} else {
-			intervalMap.put(diference, new LinkedList<ProducerIntervalDto>(Arrays.asList(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()))));
-		}
 
-		return diference;
+		if (p.getIndicateds().indexOf(i1) < p.getIndicateds().size() - 1) {
+			Indicated i2 = p.getIndicateds().get(p.getIndicateds().indexOf(i1) + 1);
+
+			if (i1.getYear() > i2.getYear()) {
+				diference = i1.getYear() - i2.getYear();
+			} else {
+				diference = i2.getYear() - i1.getYear();
+			}
+
+			if (intervalMap.containsKey(diference)) {
+				intervalMap.get(diference)
+						.add(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()));
+			} else {
+				intervalMap.put(diference, new LinkedList<ProducerIntervalDto>(
+						Arrays.asList(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()))));
+			}
+		}
 	}
+
 	@PostConstruct
 	public void loadFile() throws IOException {
 		File file;
@@ -123,7 +120,6 @@ public class IndicatedController {
 			file = ResourceUtils.getFile("classpath:movielist.csv");
 			InputStream fileStream = new FileInputStream(file);
 			List<IndicatedCsv> indicatedsCsvList = CsvUtil.read(IndicatedCsv.class, fileStream);
-			// indicatedsCsvList.forEach(i -> System.out.println(i.toString()));
 
 			HashMap<String, Studio> studioHmp = this.saveUniqueStudios(indicatedsCsvList);
 			HashMap<String, Producer> producerHmp = this.saveUniqueProducers(indicatedsCsvList);

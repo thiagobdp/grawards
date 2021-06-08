@@ -17,7 +17,6 @@ public class ProducerIntervalDto {
 
 	public ProducerIntervalDto() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getProducer() {

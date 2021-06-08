@@ -42,6 +42,10 @@ public class Producer {
 		return indicateds;
 	}
 
+	public void setIndicateds(List<Indicated> indicateds) {
+		this.indicateds = indicateds;
+	}
+
 	@Override
 	public String toString() {
 		
