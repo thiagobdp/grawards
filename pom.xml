@@ -12,8 +12,8 @@
 	<groupId>br.com</groupId>
 	<artifactId>grawards</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>forum</name>
-	<description>Golden Raspberry Awards Teste</description>
+	<name>grawards</name>
+	<description>Golden Raspberry Awards</description>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -52,8 +52,7 @@
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-csv</artifactId>
 		</dependency>
-		
-		
+
 	</dependencies>
 
 	<build>

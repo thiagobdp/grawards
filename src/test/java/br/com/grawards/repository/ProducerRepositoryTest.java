@@ -1,7 +1,5 @@
 package br.com.grawards.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
 
 import org.junit.Assert;
@@ -49,11 +47,4 @@ public class ProducerRepositoryTest {
 		Assert.assertTrue(prodLst.size()==0);
 	}
 
-	@Test
-	public void findByNameLoadedByCSVTest() {
-		String producerName = "Producer3";
-		List<Producer> prodLst=this.repository.findByName(producerName);
-		Assert.assertNotNull(prodLst);
-		Assert.assertTrue(prodLst.size()==0);
-	}
 }
