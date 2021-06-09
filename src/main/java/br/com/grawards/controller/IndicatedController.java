@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.grawards.Utils.CsvUtil;
 import br.com.grawards.controller.dto.FastestSlowestWinnerProducerDto;
+import br.com.grawards.controller.dto.IndicatedDto;
 import br.com.grawards.controller.dto.ProducerIntervalDto;
 import br.com.grawards.model.Indicated;
 import br.com.grawards.model.IndicatedCsv;
@@ -110,6 +111,16 @@ public class IndicatedController {
 		return new FastestSlowestWinnerProducerDto(
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).min().getAsInt()),
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).max().getAsInt()));
+	}
+	
+	/**
+	 * List all indicateds
+	 * @return
+	 */			
+	@GetMapping
+	public List<IndicatedDto> indicated() {
+		List<Indicated> indicateds = indicatedRepository.findAll();
+		return IndicatedDto.converter(indicateds);		
 	}
 
 	/**

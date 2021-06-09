@@ -6,7 +6,7 @@ Clone this repository in your computer: https://github.com/thiagobdp/grawards
 
 ## 💻 Running the project
 
-When running GRAwardsApplication, the CSV file "movielist.csv" which is located in the path "src\main\resources" will be loaded.
+Start running GRAwardsApplication.java. The CSV file "movielist.csv" which is located in the path "src\main\resources" will be loaded.
 
 To change the data, just replace this file.
 
@@ -16,7 +16,15 @@ Producer and Studio will be stored with non-duplicated names.
 
 A rest service is available for consultation in "/indicated/fastestSlowestWinnerProducer" to get the producer with the longest gap between two consecutive awards, and the one with the fastest two awards.
 
-Rest services for Producer and Studio are also available to list all records.
+Rest services for Producer, Studio and Indicated are also available to list all records.
+
+Services Paths:
+
+/indicated
+
+/studio
+
+/producer
 
 ## 🔬 Running Tests
 

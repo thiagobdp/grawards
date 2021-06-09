@@ -26,7 +26,7 @@ public class StudioController {
 	 */
 	@GetMapping
 	public List<StudioDto> producer() {
-		List<Studio> prod = studioRepository.findAll();
-		return prod.stream().map(StudioDto::new).collect(Collectors.toList());
+		List<Studio> studios = studioRepository.findAll();
+		return StudioDto.converter(studios);
 	}
 }

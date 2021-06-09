@@ -26,7 +26,7 @@ public class ProducerController {
 	 */
 	@GetMapping
 	public List<ProducerDto> producer() {
-		List<Producer> prod = producerRepository.findAll();
-		return prod.stream().map(ProducerDto::new).collect(Collectors.toList());
+		List<Producer> producers = producerRepository.findAll();
+		return ProducerDto.converter(producers);
 	}
 }
