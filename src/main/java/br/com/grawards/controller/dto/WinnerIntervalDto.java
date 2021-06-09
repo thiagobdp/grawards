@@ -1,13 +1,13 @@
 package br.com.grawards.controller.dto;
 
-public class ProducerIntervalDto {
+public class WinnerIntervalDto {
 
 	private String producer;
 	private Integer interval;
 	private Integer previousWin;
 	private Integer followingWin;
 	
-	public ProducerIntervalDto(String producer, Integer interval, Integer win1, Integer win2) {
+	public WinnerIntervalDto(String producer, Integer interval, Integer win1, Integer win2) {
 		super();
 		this.producer = producer;
 		this.interval = interval;
@@ -15,7 +15,7 @@ public class ProducerIntervalDto {
 		this.followingWin = win1 > win2 ? win1 : win2;
 	}
 
-	public ProducerIntervalDto() {
+	public WinnerIntervalDto() {
 		super();
 	}
 

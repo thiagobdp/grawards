@@ -14,7 +14,7 @@ When loading, data will be splitted in 3 entities: Indicated, Producer and Studi
 
 Producer and Studio will be stored with non-duplicated names.
 
-A rest service is available for consultation in "/indicated/fastestSlowestWinnerProducer" to get the producer with the longest gap between two consecutive awards, and the one with the fastest two awards.
+A rest service is available for consultation in "/producer/fastestSlowestWinner" to get the producer with the longest gap between two consecutive awards, and the one with the fastest two awards.
 
 Rest services for Producer, Studio and Indicated are also available to list all records.
 

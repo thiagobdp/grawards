@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.grawards.Utils.CsvUtil;
-import br.com.grawards.controller.dto.FastestSlowestWinnerProducerDto;
+import br.com.grawards.controller.dto.FastestSlowestWinnerDto;
 import br.com.grawards.controller.dto.ProducerDto;
-import br.com.grawards.controller.dto.ProducerIntervalDto;
+import br.com.grawards.controller.dto.WinnerIntervalDto;
 import br.com.grawards.model.Indicated;
 import br.com.grawards.model.IndicatedCsv;
 import br.com.grawards.model.Producer;
@@ -96,8 +96,8 @@ public class ProducerController {
 	 * @return
 	 */
 	@GetMapping
-	@RequestMapping("/fastestSlowestWinnerProducer")
-	public FastestSlowestWinnerProducerDto fastestSlowestWinnerProducer() {
+	@RequestMapping("/fastestSlowestWinner")
+	public FastestSlowestWinnerDto fastestSlowestWinner() {
 
 		// find producers who won at least once
 		List<Producer> prod = producerRepository.findAll();
@@ -113,12 +113,12 @@ public class ProducerController {
 
 		prodWinners.stream().forEach(p -> p.getIndicateds().sort(Comparator.comparing(Indicated::getYear)));
 
-		HashMap<Integer, List<ProducerIntervalDto>> intervalMap = new HashMap<Integer, List<ProducerIntervalDto>>();
+		HashMap<Integer, List<WinnerIntervalDto>> intervalMap = new HashMap<Integer, List<WinnerIntervalDto>>();
 
 		prodWinners.forEach(p -> p.getIndicateds().stream().iterator()
 				.forEachRemaining(i1 -> this.calculateInterval(p, i1, intervalMap)));
 
-		return new FastestSlowestWinnerProducerDto(
+		return new FastestSlowestWinnerDto(
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).min().getAsInt()),
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).max().getAsInt()));
 	}
@@ -133,7 +133,7 @@ public class ProducerController {
 	 * @param intervalMap HashMap of "Interval between winnings" and
 	 *                    "ProducerIntervalDto" that fits this interval
 	 */
-	private void calculateInterval(Producer p, Indicated i1, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
+	private void calculateInterval(Producer p, Indicated i1, HashMap<Integer, List<WinnerIntervalDto>> intervalMap) {
 
 		if (p.getIndicateds().indexOf(i1) < p.getIndicateds().size() - 1) {
 			Indicated i2 = p.getIndicateds().get(p.getIndicateds().indexOf(i1) + 1);
@@ -142,10 +142,10 @@ public class ProducerController {
 
 			if (intervalMap.containsKey(diference)) {
 				intervalMap.get(diference)
-						.add(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()));
+						.add(new WinnerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()));
 			} else {
-				intervalMap.put(diference, new LinkedList<ProducerIntervalDto>(
-						Arrays.asList(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()))));
+				intervalMap.put(diference, new LinkedList<WinnerIntervalDto>(
+						Arrays.asList(new WinnerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()))));
 			}
 		}
 	}
