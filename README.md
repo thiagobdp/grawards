@@ -32,6 +32,6 @@ Use Manven Test to run all tests together. In Eclipse IDE, righ click "pom.xml" 
 
 Tests will use "test" profile and will load the CSV file "movielist-test.csv" which is located in the path "src\main\resources".
 
-Data in this CSV file is exclusive for tests running, so don't change it.
+Data in this CSV file is exclusive for tests running, so don't change it unless you know what you are doing.
 
 Tests uses a specific DB but also in H2.
