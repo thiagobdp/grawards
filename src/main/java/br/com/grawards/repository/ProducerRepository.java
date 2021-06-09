@@ -10,4 +10,6 @@ public interface ProducerRepository extends JpaRepository<Producer, Long> {
 
 	public List<Producer> findByindicateds_winner(String winner);
 	
+	public List<Producer> findByName(String name);
+	
 }

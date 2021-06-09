@@ -16,12 +16,10 @@ public class Studio {
 	private Long id;
 
 	private String name;
-	
-	@ManyToMany (mappedBy = "studios")
-	private List<Indicated> indicateds; 
 
-	
-	
+	@ManyToMany(mappedBy = "studios")
+	private List<Indicated> indicateds;
+
 	public Studio(String name) {
 		super();
 		this.name = name;
@@ -33,5 +31,5 @@ public class Studio {
 
 	public String getName() {
 		return name;
-	}	
+	}
 }

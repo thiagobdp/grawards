@@ -17,8 +17,6 @@ public class IndicatedDto {
 		super();
 		this.year = indicated.getYear();
 		this.title = indicated.getTitle();
-//		this.studios = indicated.getStudios();
-//		this.producers = indicated.getProducers();
 		this.winner = indicated.getWinner();
 	}
 

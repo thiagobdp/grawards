@@ -45,11 +45,5 @@ public class Producer {
 	public void setIndicateds(List<Indicated> indicateds) {
 		this.indicateds = indicateds;
 	}
-
-	@Override
-	public String toString() {
-		
-		return this.name+this.getIndicateds().stream().map(i -> i.toString()).collect(Collectors.toList())+"\n";
-	}
 	
 }

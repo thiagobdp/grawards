@@ -96,9 +96,4 @@ public class Indicated {
 		this.producers = producers;
 	}
 
-	@Override
-	public String toString() {
-		return "Winner: " + this.winner + ", Title: " + this.title + ", year: " + this.year;
-	}
-
 }

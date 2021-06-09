@@ -123,7 +123,7 @@ public class IndicatedController {
 	 * @param intervalMap HashMap of "Interval between winnings" and
 	 *                    "ProducerIntervalDto" that fits this interval
 	 */
-	public void calculateInterval(Producer p, Indicated i1, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
+	private void calculateInterval(Producer p, Indicated i1, HashMap<Integer, List<ProducerIntervalDto>> intervalMap) {
 
 		if (p.getIndicateds().indexOf(i1) < p.getIndicateds().size() - 1) {
 			Indicated i2 = p.getIndicateds().get(p.getIndicateds().indexOf(i1) + 1);

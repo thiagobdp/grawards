@@ -64,13 +64,6 @@ public class IndicatedCsv {
 		return listProducers;
 	}
 
-	@Override
-	public String toString() {
-		return "Title: ".concat(this.title).concat(", Studios: ").concat(this.listStudios.toString())
-				.concat(", Producers: ").concat(this.listProducers.toString()).concat(", Year:")
-				.concat(this.year.toString()).concat(", Winner: ").concat(this.winner);
-	}
-
 	/*
 	 * Return the original string as a list splitted by: ", " " and " at the end,
 	 * stripes the values
