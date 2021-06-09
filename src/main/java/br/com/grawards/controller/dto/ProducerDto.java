@@ -3,7 +3,6 @@ package br.com.grawards.controller.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.grawards.model.Indicated;
 import br.com.grawards.model.Producer;
 
 public class ProducerDto {
