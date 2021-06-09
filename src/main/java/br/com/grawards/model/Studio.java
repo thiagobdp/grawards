@@ -20,6 +20,10 @@ public class Studio {
 	@ManyToMany(mappedBy = "studios")
 	private List<Indicated> indicateds;
 
+	public Studio() {
+		super();
+	}
+
 	public Studio(String name) {
 		super();
 		this.name = name;

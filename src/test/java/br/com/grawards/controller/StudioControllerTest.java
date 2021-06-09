@@ -22,25 +22,25 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ProducerControllerTest {
+public class StudioControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Test
-	public void listProducers() throws Exception {
-		URI uri = new URI("/producer");		
+	public void listStudio() throws Exception {
+		URI uri = new URI("/studio");
 
 		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders//
 				.get(uri)//
 				.contentType(MediaType.APPLICATION_JSON))//
-				.andExpect(MockMvcResultMatchers//
-						.status()//
-						.isOk()).andReturn();
-		
+				.andExpect(MockMvcResultMatchers.status().isOk())//
+				.andReturn();
+
 		JSONArray jsonReturned = new JSONArray(mvcResult.getResponse().getContentAsString());
-		JSONArray jsonExpected= new JSONArray("[{\"name\":\"Producer2\"},{\"name\":\"Producer3\"},{\"name\":\"Producer1\"}]");
-		
+		JSONArray jsonExpected = new JSONArray(
+				"[{\"name\":\"Studio teste3\"},{\"name\":\"Studio teste4\"},{\"name\":\"Studio teste1\"},{\"name\":\"Studio teste2\"}]");
+
 		JSONAssert.assertEquals(jsonExpected, jsonReturned, JSONCompareMode.LENIENT);
 	}
 

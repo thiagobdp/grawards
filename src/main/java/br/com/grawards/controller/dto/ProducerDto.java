@@ -8,15 +8,19 @@ import br.com.grawards.model.Producer;
 public class ProducerDto {
 
 	private Long id;
-	private String name;	
-		
+	private String name;
+
 	public ProducerDto(Producer p) {
-		this.name=p.getName();
-		this.id=p.getId();
+		this.name = p.getName();
+		this.id = p.getId();
 	}
-	
+
 	public String getName() {
 		return name;
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	public static List<ProducerDto> converter(List<Producer> producers) {
