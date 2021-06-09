@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,7 @@ import br.com.grawards.repository.ProducerRepository;
 import br.com.grawards.repository.StudioRepository;
 
 @RestController
-@RequestMapping("/indicateds")
+@RequestMapping("/indicated")
 public class IndicatedController {
 
 	@Autowired
@@ -47,6 +48,35 @@ public class IndicatedController {
 
 	@Autowired
 	private ProducerRepository producerRepository;
+
+	@Autowired
+	private Environment env;
+	
+	/**
+	 * Loads the CSV file, read data, splits in Entities and stores in the Data Base
+	 * 
+	 * @throws IOException
+	 */
+	@PostConstruct
+	public void loadFile() throws IOException {		
+		try {			
+			File file = ResourceUtils.getFile(env.getProperty("grawards.csv.filename"));
+			InputStream fileStream = new FileInputStream(file);
+			List<IndicatedCsv> indicatedsCsvList = CsvUtil.read(IndicatedCsv.class, fileStream);
+
+			HashMap<String, Studio> studioHmp = this.saveUniqueStudios(indicatedsCsvList);
+			HashMap<String, Producer> producerHmp = this.saveUniqueProducers(indicatedsCsvList);
+
+			this.indicatedRepository.saveAll(indicatedsCsvList.stream()
+					.map(i -> new Indicated(i, studioHmp, producerHmp)).collect(Collectors.toList()));
+
+			System.out.println("END");
+		} catch (FileNotFoundException e) {
+
+			e.printStackTrace();
+		}
+	}
+	
 
 	/**
 	 * Get the producer with the longest interval between two consecutive awards,
@@ -87,7 +117,8 @@ public class IndicatedController {
 	 * Calculates the interval of years between indicated1 and the next indicated in
 	 * the list of the Producer if there is another one
 	 * 
-	 * @param p           Producer The List of Indicateds must be already ordered by year
+	 * @param p           Producer The List of Indicateds must be already ordered by
+	 *                    year
 	 * @param i1          Indicated
 	 * @param intervalMap HashMap of "Interval between winnings" and
 	 *                    "ProducerIntervalDto" that fits this interval
@@ -106,32 +137,6 @@ public class IndicatedController {
 				intervalMap.put(diference, new LinkedList<ProducerIntervalDto>(
 						Arrays.asList(new ProducerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()))));
 			}
-		}
-	}
-
-	/**
-	 * Loads the CSV file, read data, splits in Entities and stores in the Data Base
-	 * 
-	 * @throws IOException
-	 */
-	@PostConstruct
-	public void loadFile() throws IOException {
-		File file;
-		try {
-			file = ResourceUtils.getFile("classpath:movielist.csv");
-			InputStream fileStream = new FileInputStream(file);
-			List<IndicatedCsv> indicatedsCsvList = CsvUtil.read(IndicatedCsv.class, fileStream);
-
-			HashMap<String, Studio> studioHmp = this.saveUniqueStudios(indicatedsCsvList);
-			HashMap<String, Producer> producerHmp = this.saveUniqueProducers(indicatedsCsvList);
-
-			this.indicatedRepository.saveAll(indicatedsCsvList.stream()
-					.map(i -> new Indicated(i, studioHmp, producerHmp)).collect(Collectors.toList()));
-
-			System.out.println("END");
-		} catch (FileNotFoundException e) {
-
-			e.printStackTrace();
 		}
 	}
 
