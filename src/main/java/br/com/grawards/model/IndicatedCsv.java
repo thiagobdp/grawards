@@ -65,7 +65,7 @@ public class IndicatedCsv {
 	}
 
 	/*
-	 * Return the original string as a list splitted by: ", " " and " at the end,
+	 * Return the original string as a list splitted by: ", ", " and ". At the end
 	 * stripes the values
 	 */
 	private List<String> splitStrings(String original) {

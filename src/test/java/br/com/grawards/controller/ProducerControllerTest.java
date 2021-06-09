@@ -28,6 +28,23 @@ public class ProducerControllerTest {
 	private MockMvc mockMvc;
 
 	@Test
+	public void fastestSlowestWinnerProducerTest() throws Exception {
+		URI uri = new URI("/producer/fastestSlowestWinner");
+
+		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders//
+				.get(uri)//
+				.contentType(MediaType.APPLICATION_JSON))//
+				.andExpect(MockMvcResultMatchers//
+						.status()//
+						.isOk()).andReturn();
+		
+		String jsonReturned = mvcResult.getResponse().getContentAsString();
+		String jsonExpected="{\"min\":[{\"producer\":\"Producer1\",\"interval\":1,\"previousWin\":1980,\"followingWin\":1981}],\"max\":[{\"producer\":\"Producer3\",\"interval\":11,\"previousWin\":1980,\"followingWin\":1991}]}";
+		
+		JSONAssert.assertEquals(jsonExpected, jsonReturned, JSONCompareMode.LENIENT);		
+	}
+	
+	@Test
 	public void listProducers() throws Exception {
 		URI uri = new URI("/producer");		
 

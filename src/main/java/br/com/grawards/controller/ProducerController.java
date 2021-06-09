@@ -50,6 +50,9 @@ public class ProducerController {
 	@Autowired
 	private StudioRepository studioRepository;
 
+	@Autowired
+	private Environment env;
+
 	/**
 	 * List all producers
 	 * 
@@ -61,11 +64,9 @@ public class ProducerController {
 		return ProducerDto.converter(producers);
 	}
 
-	@Autowired
-	private Environment env;
-
 	/**
-	 * Loads the CSV file, read data, splits in Entities and stores in the Data Base
+	 * Loads the CSV file, read data, splits in Entities (Producer, Studio and
+	 * Indicated) and stores in the Data Base
 	 * 
 	 * @throws IOException
 	 */
@@ -79,18 +80,17 @@ public class ProducerController {
 			HashMap<String, Studio> studioHmp = this.saveUniqueStudios(indicatedsCsvList);
 			HashMap<String, Producer> producerHmp = this.saveUniqueProducers(indicatedsCsvList);
 
+			// saves all indicateds with its lists of Studios and Producers
 			this.indicatedRepository.saveAll(indicatedsCsvList.stream()
 					.map(i -> new Indicated(i, studioHmp, producerHmp)).collect(Collectors.toList()));
 
-			System.out.println("END");
 		} catch (FileNotFoundException e) {
-
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Get the producer with the longest interval between two consecutive awards,
+	 * Get the producers with the longest interval between two consecutive awards,
 	 * and the ones who got two awards faster
 	 * 
 	 * @return
@@ -99,24 +99,20 @@ public class ProducerController {
 	@RequestMapping("/fastestSlowestWinner")
 	public FastestSlowestWinnerDto fastestSlowestWinner() {
 
-		// find producers who won at least once
 		List<Producer> prod = producerRepository.findAll();
 
-		// remove non-winning Indicateds
+		// remove non-winning Indicateds by resetting de producer list with only winning
+		// indicateds
 		prod.stream().forEach(p -> p.setIndicateds(p.getIndicateds().stream()
 				.filter(i -> i.getWinner().equalsIgnoreCase(WinnerEnum.YES.getWinner())).collect(Collectors.toList())));
 
-		List<Producer> prodWinners = new ArrayList<Producer>();
+		// keep only the winners who have won at least twice or more
+		List<Producer> pWinners2orMore = new ArrayList<Producer>();
+		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> pWinners2orMore.add(p));
 
-		// keep only the winners who have won at least twice
-		prod.stream().filter(p -> p.getIndicateds().size() > 1).forEach(p -> prodWinners.add(p));
+		pWinners2orMore.stream().forEach(p -> p.getIndicateds().sort(Comparator.comparing(Indicated::getYear)));
 
-		prodWinners.stream().forEach(p -> p.getIndicateds().sort(Comparator.comparing(Indicated::getYear)));
-
-		HashMap<Integer, List<WinnerIntervalDto>> intervalMap = new HashMap<Integer, List<WinnerIntervalDto>>();
-
-		prodWinners.forEach(p -> p.getIndicateds().stream().iterator()
-				.forEachRemaining(i1 -> this.calculateInterval(p, i1, intervalMap)));
+		HashMap<Integer, List<WinnerIntervalDto>> intervalMap = this.createMapOfWinnersInterval(pWinners2orMore);
 
 		return new FastestSlowestWinnerDto(
 				intervalMap.get(intervalMap.keySet().stream().mapToInt(t -> t).min().getAsInt()),
@@ -124,44 +120,68 @@ public class ProducerController {
 	}
 
 	/**
+	 * Creates a HashMap of Interval between Winnings and its producers. Key - is
+	 * the interval of winnings in years. List - All producers that have winnings in
+	 * the interval key.
+	 * 
+	 * @param producers
+	 * @return HashMap ("Interval", "All producers that have winnings in the
+	 *         interval")
+	 */
+	private HashMap<Integer, List<WinnerIntervalDto>> createMapOfWinnersInterval(List<Producer> producers) {
+		HashMap<Integer, List<WinnerIntervalDto>> winnersIntervalMap = new HashMap<Integer, List<WinnerIntervalDto>>();
+
+		producers.forEach(p -> p.getIndicateds().stream().iterator()
+				.forEachRemaining(i1 -> this.calculateInterval(p, i1, winnersIntervalMap)));
+
+		return winnersIntervalMap;
+	}
+
+	/**
 	 * Calculates the interval of years between indicated1 and the next indicated in
 	 * the list of the Producer if there is another one
 	 * 
-	 * @param p           Producer The List of Indicateds must be already ordered by
-	 *                    year
-	 * @param i1          Indicated
-	 * @param intervalMap HashMap of "Interval between winnings" and
-	 *                    "ProducerIntervalDto" that fits this interval
+	 * @param producer       The Producer's List of Indicateds must be already
+	 *                       ordered by year
+	 * @param indicatedFirst Indicated to be used to compare to the next
+	 * @param intervalMap    HashMap of "Interval between winnings" and
+	 *                       "ProducerIntervalDto" that fits this interval
 	 */
-	private void calculateInterval(Producer p, Indicated i1, HashMap<Integer, List<WinnerIntervalDto>> intervalMap) {
+	private void calculateInterval(Producer producer, Indicated indicatedFirst,
+			HashMap<Integer, List<WinnerIntervalDto>> intervalMap) {
 
-		if (p.getIndicateds().indexOf(i1) < p.getIndicateds().size() - 1) {
-			Indicated i2 = p.getIndicateds().get(p.getIndicateds().indexOf(i1) + 1);
+		// proceeds only if there is one more indicated in the producer's indicateds
+		// list
+		if (producer.getIndicateds().indexOf(indicatedFirst) < producer.getIndicateds().size() - 1) {
+			// gets the next sequencial indicated
+			Indicated indicatedNext = producer.getIndicateds()
+					.get(producer.getIndicateds().indexOf(indicatedFirst) + 1);
 
-			Integer diference = i2.getYear() - i1.getYear();
+			Integer interval = indicatedNext.getYear() - indicatedFirst.getYear();
 
-			if (intervalMap.containsKey(diference)) {
-				intervalMap.get(diference)
-						.add(new WinnerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()));
+			if (intervalMap.containsKey(interval)) {
+				intervalMap.get(interval).add(new WinnerIntervalDto(producer.getName(), interval,
+						indicatedFirst.getYear(), indicatedNext.getYear()));
 			} else {
-				intervalMap.put(diference, new LinkedList<WinnerIntervalDto>(
-						Arrays.asList(new WinnerIntervalDto(p.getName(), diference, i1.getYear(), i2.getYear()))));
+				intervalMap.put(interval,
+						new LinkedList<WinnerIntervalDto>(Arrays.asList(new WinnerIntervalDto(producer.getName(),
+								interval, indicatedFirst.getYear(), indicatedNext.getYear()))));
 			}
 		}
 	}
 
 	/**
-	 * Create a set of non-duplicate Studio's names and save to database
+	 * Creates a set of non-duplicate Studio's names and saves to database
 	 * 
 	 * @param indicatedsCsvList
 	 * @return HashMap of Studios having the name of the Studio as Key
 	 */
 	private HashMap<String, Studio> saveUniqueStudios(List<IndicatedCsv> indicatedsCsvList) {
 		// save unique studios
-		Set<String> studiosSet = new HashSet<String>();
-		indicatedsCsvList.forEach(i -> studiosSet.addAll(i.getListStudios()));
+		Set<String> studiosUniqueNameSet = new HashSet<String>();
+		indicatedsCsvList.forEach(i -> studiosUniqueNameSet.addAll(i.getListStudios()));
 		List<Studio> studioList = this.studioRepository
-				.saveAll(studiosSet.stream().map(Studio::new).collect(Collectors.toList()));
+				.saveAll(studiosUniqueNameSet.stream().map(Studio::new).collect(Collectors.toList()));
 
 		// creates hashmap of saved studios
 		HashMap<String, Studio> studioHmp = new HashMap<String, Studio>();
@@ -170,17 +190,17 @@ public class ProducerController {
 	}
 
 	/**
-	 * Create a set of non-duplicate Producer's names and save to database
+	 * Creates a set of non-duplicate Producer's names and saves to database
 	 * 
 	 * @param indicatedsCsvList
 	 * @return HashMap of Producers having the name of the Producer as Key
 	 */
 	private HashMap<String, Producer> saveUniqueProducers(List<IndicatedCsv> indicatedsCsvList) {
-		// load and save unique producers
-		Set<String> producersSet = new HashSet<String>();
-		indicatedsCsvList.forEach(i -> producersSet.addAll(i.getListProducers()));
+		Set<String> producersUniqueNameSet = new HashSet<String>();
+		indicatedsCsvList.forEach(i -> producersUniqueNameSet.addAll(i.getListProducers()));
+
 		List<Producer> producerList = this.producerRepository
-				.saveAll(producersSet.stream().map(Producer::new).collect(Collectors.toList()));
+				.saveAll(producersUniqueNameSet.stream().map(Producer::new).collect(Collectors.toList()));
 
 		// creates hashmap of saved Producers
 		HashMap<String, Producer> producerHmp = new HashMap<String, Producer>();
