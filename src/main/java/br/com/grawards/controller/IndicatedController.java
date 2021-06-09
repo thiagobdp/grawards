@@ -89,7 +89,6 @@ public class IndicatedController {
 	public FastestSlowestWinnerProducerDto fastestSlowestWinnerProducer() {
 
 		// find producers who won at least once
-//		List<Producer> prod = producerRepository.findByindicateds_winner("yes"); //TODO: assim traz duplicados, verificar qual o problema
 		List<Producer> prod = producerRepository.findAll();
 
 		// remove non-winning Indicateds
